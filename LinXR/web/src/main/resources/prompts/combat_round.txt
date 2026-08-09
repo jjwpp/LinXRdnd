@@ -1,0 +1,8 @@
+【战斗回合{round}结果】
+{summary}
+{enemyTurn}
+
+当前状态：
+玩家HP: {currentHp}/{maxHp}
+{enemyStatus}
+请用2-3句话叙述这一回合的战斗过程，然后给出战斗选项（必须包含：物理攻击、施放法术、逃跑）。

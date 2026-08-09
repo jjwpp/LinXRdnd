@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LXR · D&D 法典</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+</head>
+<body>
+<div id="app">
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-inner">
+            <div class="logo">
+                <span class="logo-icon">⚔️</span>
+                <div>
+                    <h1>LXR · D&D 法典</h1>
+                    <p class="subtitle">龙与地下城 5e 规则参考</p>
+                </div>
+            </div>
+            <button class="btn-random" @click="handleRandomExplore" :disabled="loading">
+                🎲 随机探索
+            </button>
+        </div>
+    </header>
+
+    <div class="app-body">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3>📚 分类</h3>
+                <button
+                    class="cat-btn"
+                    :class="{ active: selectedCategory === '' }"
+                    @click="selectCategory('')"
+                >
+                    全部
+                    <span class="count">{{ totalCount }}</span>
+                </button>
+                <button
+                    v-for="cat in categories"
+                    :key="cat.id"
+                    class="cat-btn"
+                    :class="{ active: selectedCategory === cat.id }"
+                    @click="selectCategory(cat.id)"
+                >
+                    {{ cat.nameZh || cat.name }}
+                    <span class="count">{{ cat.entryCount }}</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <!-- Search Bar -->
+            <div class="search-bar">
+                <input
+                    type="text"
+                    v-model="keyword"
+                    placeholder="搜索职业、种族、法术、怪物..."
+                    @input="onSearch"
+                />
+                <span class="search-icon">🔍</span>
+            </div>
+
+            <!-- Loading -->
+            <div v-if="loading" class="loading">
+                <div class="spinner"></div>
+                <p>探索多元宇宙中...</p>
+            </div>
+
+            <!-- Entry Cards -->
+            <template v-if="!loading">
+                <section v-if="entries.length > 0">
+                    <h2 class="section-title">{{ selectedCategory ? '筛选结果' : '全部条目' }}</h2>
+                    <div class="card-grid">
+                        <div
+                            v-for="entry in entries"
+                            :key="entry.id"
+                            class="card"
+                            :class="'card-' + (entry.categoryId || '')"
+                            @click="openDetail(entry)"
+                        >
+                            <div class="card-header">
+                                <h3 class="card-name">{{ entry.name }}</h3>
+                                <span class="card-subtitle">{{ entry.subtitle }}</span>
+                            </div>
+                            <p class="card-summary">{{ entry.summary }}</p>
+                            <div class="card-tags" v-if="entry.tags && entry.tags.length">
+                                <span
+                                    v-for="tag in entry.tags"
+                                    :key="tag"
+                                    class="tag"
+                                    :class="'tag-' + (entry.categoryId || '')"
+                                >{{ tag }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Random Section -->
+                <section v-if="randomItems.length > 0" class="random-section">
+                    <h2 class="section-title">🎲 随机发现</h2>
+                    <div class="card-grid card-grid-small">
+                        <div
+                            v-for="entry in randomItems"
+                            :key="entry.id"
+                            class="card card-random"
+                            :class="'card-' + (entry.categoryId || '')"
+                            @click="openDetail(entry)"
+                        >
+                            <h3>{{ entry.name }}</h3>
+                            <p class="card-subtitle">{{ entry.subtitle }}</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Empty state -->
+                <div v-if="entries.length === 0 && !loading" class="empty">
+                    <p>🔮 未找到匹配的条目，试试其他关键词吧</p>
+                </div>
+            </template>
+        </main>
+    </div>
+
+    <!-- Detail Modal -->
+    <div v-if="selectedEntry" class="modal-overlay" @click.self="closeDetail">
+        <div class="modal" :class="'modal-' + (selectedEntry.categoryId || '')">
+            <button class="modal-close" @click="closeDetail">&times;</button>
+            <div class="modal-header">
+                <h2>{{ selectedEntry.name }}</h2>
+                <p class="modal-subtitle">{{ selectedEntry.subtitle }}</p>
+            </div>
+            <div class="modal-body">
+                <p class="modal-summary">{{ selectedEntry.summary }}</p>
+                <div class="modal-tags" v-if="selectedEntry.tags && selectedEntry.tags.length">
+                    <span v-for="tag in selectedEntry.tags" :key="tag" class="tag" :class="'tag-' + (selectedEntry.categoryId || '')">{{ tag }}</span>
+                </div>
+                <div class="modal-details" v-if="selectedEntry.details && selectedEntry.details.length">
+                    <h4>详细信息</h4>
+                    <ul>
+                        <li v-for="(d, i) in selectedEntry.details" :key="i">{{ d }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/js/app.js"></script>
+</body>
+</html>
